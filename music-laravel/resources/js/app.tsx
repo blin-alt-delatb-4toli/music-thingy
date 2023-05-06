@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom/client';
 import '/resources/css/music.css';
 
 import {Root, About, Playlists, ErrorPage, RegisterPage} from "./routes";
+import { AuthUser, UserContext } from './what/login';
 
 import {
   createBrowserRouter,
@@ -18,6 +19,17 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
   },
+  {
+    path: "login",
+    loader: async() => {
+      return {
+        openLogin: true,
+      };
+    },
+    element: <Root />,
+    errorElement: <ErrorPage />,
+  },
+  
   {
     path: "about",
     element: <About />,
@@ -33,19 +45,10 @@ const router = createBrowserRouter([
     element: <RegisterPage />,
     errorElement: <ErrorPage />,
   },
-  {
-    path: "login",
-    loader: async() => {
-      return {
-        openLogin: true,
-      };
-    },
-    element: <Root />,
-    errorElement: <ErrorPage />,
-  },
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
   <React.StrictMode>
     <RouterProvider router={router} />

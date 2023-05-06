@@ -1,6 +1,11 @@
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, createContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+export const UserContext = createContext({
+    user: null,
+    userActions: null,
+});
 
 class User {
     _username: string;
@@ -33,7 +38,7 @@ class User {
     }
 }
 
-export default function AuthUser() {
+export function AuthUser() {
     const navigate = useNavigate();
 
     const getToken = () =>{

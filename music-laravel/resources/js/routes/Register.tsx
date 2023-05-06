@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowSmallLeftIcon } from "@heroicons/react/24/outline";
 import { useState } from "react"
 import { redirect, useNavigate } from 'react-router-dom';
-import AuthUser from '../what/login';
+import { AuthUser, UserContext } from '../what/login';
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -70,7 +70,7 @@ export default function RegisterPage() {
         .then((res)=>{
             console.log("successful register =>", res);
             if (res.data["token"]) {
-                saveToken(res.data["user"], res.data["token"]);
+                setToken(res.data["user"], res.data["token"]);
                 navigate("/");
             }
         }, (err)=>{

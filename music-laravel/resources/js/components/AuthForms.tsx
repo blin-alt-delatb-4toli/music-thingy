@@ -1,15 +1,17 @@
 import { Menu } from "@headlessui/react";
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { useNavigate } from 'react-router-dom';
-import AuthUser from '../what/login';
+import { AuthUser, UserContext } from '../what/login';
 
-export function AuthForms(userActions) {
+export function AuthForms() {
     const navigate = useNavigate();
+    const { userActions } = useContext(UserContext);
     const {http, setToken} = userActions;
+
     const [login, setLogin] = useState();
     const [password, setPassword] = useState();
     const [errors, setErrors] = useState();
-
+    
     const submitForm = () =>{
         // api call
         http.post('/api/login', {login:login, password:password})

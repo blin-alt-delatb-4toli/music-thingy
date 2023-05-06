@@ -1,21 +1,15 @@
-import { Fragment } from 'react'
-import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { useState, createContext, useContext } from "react";
 import { TopNav } from '../components/TopNav'
+import { AuthUser, UserContext } from '../what/login';
 
 export default function Root() {
-  return (
-    <>
-      {/*
-        This example requires updating your template:
+  const userActions = AuthUser();
+  const bruh = { user: userActions.user, userActions: userActions };
 
-        ```
-        <html class="h-full bg-gray-100">
-        <body class="h-full">
-        ```
-      */}
+  return (
+    <UserContext.Provider value={bruh}>
       <div className="min-h-full">
-        { TopNav() }
+        <TopNav/>
 
         <header className="bg-white shadow">
           <div className="mx-auto max-w-7xl py-3 px-4 sm:px-6 lg:px-8">
@@ -56,6 +50,6 @@ export default function Root() {
           </div>
         </main>
       </div>
-    </>
+    </UserContext.Provider>
   )
 }

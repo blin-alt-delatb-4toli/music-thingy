@@ -1,11 +1,11 @@
-import React, { Component, Fragment } from 'react'
+import React, { Component, Fragment, useContext } from 'react'
 import { useLocation, Outlet, Link, useLoaderData } from 'react-router-dom'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 import { AccountIcon } from './AccountIcon'
 import { AuthForms } from './AuthForms'
-import AuthUser from '../what/login';
+import { AuthUser, UserContext } from '../what/login';
 
 const user = {
   name: 'bill apple musk',
@@ -18,8 +18,6 @@ const navigation = [
   { name: 'About', href: '/about', current: false },
 ]
 
-
-
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
@@ -29,43 +27,39 @@ const accountNavigation = [
 	{ name: 'Register', href: '/register' },
   ]
 
-class AccountOptions extends Component {
-	render() {
-		const userActions = this.props["userActions"];
-		const loaderData = this.props["loaderData"];
-	
-		return ( <>
-			<Menu as="div" className="relative ml-auto right-0">
-			<Disclosure className="bg-gray-800" defaultOpen={loaderData.openLogin}>
-				{({ open }) => ( <>
-					<Disclosure.Button className={classNames(
-							open
-								? 'bg-gray-900 text-white'
-								: 'text-gray-300 hover:bg-gray-700 hover:text-white',
-							'px-3 h-full text-sm font-medium',
-							'flex flex-col justify-center relative'
-						)}>
-						<a> Login </a>
-					</Disclosure.Button>
-	
-					<Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-						{ AuthForms(userActions) }
-					</Menu.Items>
-					</>
-				)}
-			</Disclosure>
-			</Menu>
-		</> )
-	}
+
+function AccountOptions({loaderData}) {
+
+	return ( <>
+		<Menu as="div" className="relative ml-auto right-0">
+		<Disclosure className="bg-gray-800" defaultOpen={loaderData.openLogin}>
+			{({ open }) => ( <>
+				<Disclosure.Button className={classNames(
+						open
+							? 'bg-gray-900 text-white'
+							: 'text-gray-300 hover:bg-gray-700 hover:text-white',
+						'px-3 h-full text-sm font-medium',
+						'flex flex-col justify-center relative'
+					)}>
+					<a> Login </a>
+				</Disclosure.Button>
+
+				<Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+					{ AuthForms() }
+				</Menu.Items>
+				</>
+			)}
+		</Disclosure>
+		</Menu>
+	</> )
 }
 
 export function TopNav() {
 	const {pathname} = useLocation();
-	const userActions = AuthUser();
 	const loaderData = useLoaderData() ?? {};
-	const me = userActions.user;
+	const { user } = useContext(UserContext);
 
-  return (
+  	return (
 		<Disclosure as="nav" className="bg-gray-800">
 			{({ open }) => ( <>
 				<div className="mx-auto max-w-7xl sm:px-2 px-4 lg:px-8 flex">
@@ -112,8 +106,8 @@ export function TopNav() {
 						</div>
 					</div>
 					{
-						me ? (<AccountIcon userActions={userActions} open={open} />) :
-							(<AccountOptions userActions={userActions} loaderData={loaderData} />)
+						user ? (<AccountIcon open={open} />) :
+							(<AccountOptions loaderData={loaderData} />)
 					}
 				</div>
 			</> )}
