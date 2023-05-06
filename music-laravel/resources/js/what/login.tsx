@@ -66,12 +66,6 @@ export default function AuthUser() {
         setUser(getUser());
     }
 
-    const logout = () => {
-        sessionStorage.clear();
-        setUser(null);
-        setToken(null);
-    }
-
     const http = axios.create({
         // baseURL: "balls.itch/api",
         headers: {
@@ -79,12 +73,30 @@ export default function AuthUser() {
             "Authorization" : `Bearer ${token}`
         }
     });
+
+    const logout = () => {
+        sessionStorage.clear();
+        setUser(null);
+        setToken(null);
+    }
+
+    const reqLogout = () => {
+        http.post('/api/logout', {})
+            .then((res)=>{
+                console.log("successful logout =>", res);
+                logout();
+            }, (err)=>{
+                console.log("error while logging out!?", err);
+            })
+    }
+    
     return {
         setToken:saveToken,
         token,
         user,
         getToken,
         http,
-        logout
+        logout,
+        reqLogout
     }
 }
