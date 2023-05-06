@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family:
+  -apple-system, BlinkMacSystemFont,
+  'Noto Sans',
+  'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+  'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+@layer components {
+  .musBtnElevated {
+    @apply bg-white hover:bg-gray-100 text-gray-800 font-semibold border border-gray-400 rounded shadow;
+  }
+
+  .link {
+    @apply font-medium text-blue-600 dark:text-blue-500 hover:underline
+  }
+
+  .musTextField {
+    @apply p-2.5 min-w-0 w-full
+    rounded-lg
+    border flex-1 text-sm
+    
+    bg-gray-50 border-gray-300
+    text-gray-900
+    
+    dark:bg-gray-700 dark:border-gray-600
+    dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
+  }
+
+  .musTextFieldEntry {
+    @apply p-2.5 min-w-0 w-full
+    rounded-none rounded-r-lg
+    border flex-1 text-sm
+    
+    bg-gray-50 border-gray-300
+    text-gray-900
+    
+    dark:bg-gray-700 dark:border-gray-600
+    dark:placeholder-gray-400 dark:text-white
+
+    invalid:bg-red-200
+    invalid:border-red-700
+    invalid:focus:border-red-600
+  }
+
+  .musTextFieldIconHolder {
+    @apply inline-flex items-center justify-center
+    px-1.5 w-8
+    border border-r-0 
+    text-lg font-bold 
+    rounded-l-md
+  
+    text-gray-900  dark:text-gray-400
+    bg-gray-200 dark:bg-gray-600
+    border-gray-300 dark:border-gray-600
+    pointer-events-none
+  }
+
+  .musTextFieldIcon {
+    @apply musTextFieldIconHolder
+    rounded-none border-none px-0
+  }
+}
