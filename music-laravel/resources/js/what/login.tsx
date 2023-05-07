@@ -11,8 +11,9 @@ class User {
     _username: string;
     _userid: string;
     _avatarURL: string = "https://i.imgur.com/flZWEsb.png";
+    _token: string | undefined;
 
-    constructor(userid: string, name: string) {
+    constructor(userid: string, name: string, token: string) {
         this._userid = userid;
         this._username = name;
     }
@@ -36,11 +37,13 @@ class User {
     set avatar(value: string) {
         this._avatarURL = value;
     }
+
+    get token() : string | undefined {
+        return this._token;
+    }
 }
 
-export function AuthUser() {
-    const navigate = useNavigate();
-
+export function UserState() {
     const getToken = () =>{
         const tokenString = sessionStorage.getItem('token') ?? '[]';
         const userToken = JSON.parse(tokenString);
@@ -54,7 +57,7 @@ export function AuthUser() {
         }
 
         const user_detail = JSON.parse(userString);
-        var user = new User(user_detail["username"], user_detail["username"]);
+        var user = new User(user_detail["username"], user_detail["username"], user_detail["token"]);
         user.avatar = "??";
 
         return user;

@@ -5,7 +5,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 import { AccountIcon } from './AccountIcon'
 import { AuthForms } from './AuthForms'
-import { AuthUser, UserContext } from '../what/login';
+import { UserContext } from '../what/login';
 
 const user = {
   name: 'bill apple musk',

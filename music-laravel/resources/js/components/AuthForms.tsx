@@ -1,7 +1,7 @@
 import { Menu } from "@headlessui/react";
 import { useState, useContext } from "react"
 import { useNavigate } from 'react-router-dom';
-import { AuthUser, UserContext } from '../what/login';
+import { UserContext } from '../what/login';
 
 export function AuthForms() {
     const navigate = useNavigate();
