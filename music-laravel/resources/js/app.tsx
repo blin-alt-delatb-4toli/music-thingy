@@ -5,19 +5,44 @@ import ReactDOM from 'react-dom/client';
 import '/resources/css/music.css';
 
 import {Root, About, Playlists, ErrorPage, RegisterPage} from "./routes";
-import { AuthUser, UserContext } from './what/login';
+import { UserContext } from './what/login';
 
 import {
   createBrowserRouter,
   redirect,
   RouterProvider,
 } from "react-router-dom";
+import { Dashboard } from './routes/Dashboard';
 
-const router = createBrowserRouter([
+const rootElems = {
+  "/": {
+    element: <Dashboard />,
+  },
+
+  "about": {
+    element: <About />,
+  },
+
+  "playlists": {
+    element: <Playlists />
+  },
+}
+
+var rootChildren: (Object)[] = [];
+
+for (var path in rootElems) {
+  rootChildren.push({
+    path: path,
+    element: rootElems[path].element
+  });
+}
+
+const arr = [
   {
     path: "/",
     element: <Root />,
     errorElement: <ErrorPage />,
+    children: rootChildren,
   },
   {
     path: "login",
@@ -29,23 +54,15 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
   },
-  
-  {
-    path: "about",
-    element: <About />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: "playlists",
-    element: <Playlists />,
-    errorElement: <ErrorPage />,
-  },
+
   {
     path: "register",
     element: <RegisterPage />,
     errorElement: <ErrorPage />,
   },
-]);
+];
+
+const router = createBrowserRouter(arr);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 

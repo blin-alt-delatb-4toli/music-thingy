@@ -2,11 +2,11 @@ import React from 'react';
 import { ArrowSmallLeftIcon } from "@heroicons/react/24/outline";
 import { useState } from "react"
 import { redirect, useNavigate } from 'react-router-dom';
-import { AuthUser, UserContext } from '../what/login';
+import { UserState, UserContext } from '../what/login';
 
 export default function RegisterPage() {
     const navigate = useNavigate();
-    const {http, setToken} = AuthUser();
+    const {http, setToken} = UserState();
     const [username, setUsername] = useState();
     const [email, setEmail] = useState();
 
