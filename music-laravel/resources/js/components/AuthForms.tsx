@@ -6,7 +6,7 @@ import { UserContext } from '../what/login';
 export function AuthForms() {
     const navigate = useNavigate();
     const { userActions } = useContext(UserContext);
-    const {http, setToken} = userActions;
+    const {http, saveUser} = userActions;
 
     const [login, setLogin] = useState();
     const [password, setPassword] = useState();
@@ -18,7 +18,7 @@ export function AuthForms() {
         .then((res)=>{
             console.log("successful login =>", res);
             if (res.data["token"]) {
-                setToken(res.data["user"], res.data["token"]);
+                saveUser(res.data["user"], res.data["token"]);
                 navigate("/");
             }
         }, (err)=>{

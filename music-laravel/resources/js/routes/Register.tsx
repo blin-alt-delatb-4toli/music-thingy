@@ -6,7 +6,7 @@ import { UserState, UserContext } from '../what/login';
 
 export default function RegisterPage() {
     const navigate = useNavigate();
-    const {http, setToken} = UserState();
+    const {http, saveUser} = UserState();
     const [username, setUsername] = useState();
     const [email, setEmail] = useState();
 
@@ -70,7 +70,7 @@ export default function RegisterPage() {
         .then((res)=>{
             console.log("successful register =>", res);
             if (res.data["token"]) {
-                setToken(res.data["user"], res.data["token"]);
+                saveUser(res.data["user"], res.data["token"]);
                 navigate("/");
             }
         }, (err)=>{

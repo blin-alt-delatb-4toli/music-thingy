@@ -31,6 +31,9 @@ Route::post('logout', [LoginController::class, 'logout']);
 Route::post('register', [RegisterController::class, 'register']);
 
 Route::middleware('auth')->group(function () {
-    Route::get('/playlists/get', [PlaylistController::class, 'get'])
-        ->name('playlists.get');
+    Route::get('/playlists/list', [PlaylistController::class, 'listOwn'])
+        ->name('playlists.listOwn');
 });
+
+Route::get('/playlists/listPublic', [PlaylistController::class, 'listPublic'])
+    ->name('playlists.listPublic');

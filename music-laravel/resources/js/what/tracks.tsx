@@ -1,14 +1,14 @@
 export class Track {
-    _name: string;
+    public name: string;
+    public author: string | null = "";
+
     _id: number;
     _url: string | null | undefined; // TODO: is null even useful?
     
     constructor(id: number, name: string) {
-        this._name = name;
+        this.name = name;
         this._id = id;
     }
-
-
 
     get id(): number {
         return this._id;

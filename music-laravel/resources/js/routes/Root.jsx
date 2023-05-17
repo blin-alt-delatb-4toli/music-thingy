@@ -10,7 +10,7 @@ export default function Root() {
 
   return (
     <UserContext.Provider value={bruh}>
-      <div className="min-h-full">
+      <div className="min-h-full flex flex-col h-screen">
         <TopNav/>
         <Outlet />
       </div>

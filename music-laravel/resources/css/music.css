@@ -21,17 +21,37 @@ code {
 
 @layer components {
   .musBtnElevated {
-    @apply bg-white hover:bg-gray-100 text-gray-800 font-semibold border border-gray-400 rounded shadow;
+    @apply
+    px-2
+    font-semibold border
+    rounded shadow
+    
+    bg-white text-gray-800
+    hover:bg-gray-100 border-gray-400;
   }
 
+  .musBtnElevatedGreen {
+    @apply musBtnElevated
+    bg-emerald-600 text-white border-emerald-800
+    hover:bg-emerald-500
+  }
+
+  .musBtnElevatedBlue {
+    @apply musBtnElevated
+    bg-sky-700 text-white border-blue-900
+    hover:bg-sky-600
+  }
   .link {
     @apply font-medium text-blue-600 dark:text-blue-500 hover:underline
   }
 
+  /* standalone text field (no icon) */
   .musTextField {
-    @apply p-2.5 min-w-0 w-full
-    rounded-lg
-    border flex-1 text-sm
+    @apply p-1 py-0.5
+    /* even when standalone, rounding just the right side looks good*/
+    rounded-none rounded-r-lg
+    border
+    text-sm
     
     bg-gray-50 border-gray-300
     text-gray-900
@@ -40,6 +60,7 @@ code {
     dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
   }
 
+  /* more complex entry consisting of a div (icon) and an input */
   .musTextFieldEntry {
     @apply p-2.5 min-w-0 w-full
     rounded-none rounded-r-lg

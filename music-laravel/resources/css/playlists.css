@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+
+    .playlistScroll {
+        box-shadow: inset 0 0px 4px 0 rgb(0 0 0 / 0.3);
+        @apply bg-neutral-200
+    }
+
+    .playlistOption {
+        @apply 
+        hover:bg-slate-300 hover:rounded-md
+        text-left text-black pl-3
+    }
+
+    .tracklistScroll {
+        @apply border
+        bg-gray-50
+        border-gray-300
+    }
+
+    .trackEntry {
+        @apply border-b
+        bg-gray-100
+        border-neutral-400
+    }
+
+    .newTrackEntry {
+        @apply trackEntry
+        drop-shadow-lg
+    }
+
+    .trackName {
+        @apply
+        ml-2
+        font-bold text-lg leading-tight
+    }
+
+    .trackAuthor {
+        @apply text-sm leading-tight
+        ml-3 text-neutral-500
+    }
+
+    .trackDetails {
+        box-shadow: inset 14px 0px 6px -12px rgb(0 0 0 / 0.3);
+        @apply bg-gray-200
+
+    }
+}

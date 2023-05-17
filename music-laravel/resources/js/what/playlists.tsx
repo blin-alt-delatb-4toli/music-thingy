@@ -4,13 +4,17 @@ import { useState, createContext, useContext, useEffect } from 'react';
 import { UserContext } from "./login";
 
 export class Playlist {
-    _name: string;
+    public name: string;
     _id: number;
     _tracks: { [trackId: number]: Track } = {};
 
     constructor(id: number, name: string) {
-        this._name = name;
+        this.name = name;
         this._id = id;
+
+        for (var i = 0; i < 5; i++) {
+            this.addTrack(new Track(i, "Track " + i))
+        }
     }
     
     addTrack(track: Track) : void {
@@ -21,7 +25,11 @@ export class Playlist {
         return !!(this._tracks[track._id]);
     }
 
-    // Immutable pretty please :pleading_face:
+    getTrack(id: number) : Track | null {
+        return this._tracks[id];
+    }
+
+    // Immutable tracklist pretty please :pleading_face:
     get tracks(): { [trackId: number]: Track } {
         return this._tracks;
     }
@@ -29,40 +37,69 @@ export class Playlist {
     get id(): number {
         return this._id;
     }
+
+    set id(v: number) {
+        if (this._id != -1) {
+            console.error("Can't set ID of a non-fake playlist (ID != -1)");
+            return;
+        }
+
+        this._id = v;
+    }
 }
 
 export const PlaylistContext = createContext({
     playlists: [],
+    fetching: false,
 });
 
 export function PlaylistState() {
     const [playlists, setPlaylists] = useState([]);
+    const [fetchingPlaylists, setFetchingPlaylists] = useState(true);
+    
     const {user, userActions} = useContext(UserContext);
 
-    const token = user.token;
-    console.log("playlist: user token", token);
+    var playlistState = {
+        playlists: playlists,
+        fetching: fetchingPlaylists
+    }
 
     const http = axios.create({
         // baseURL: "balls.itch/api",
         headers: {
             "Content-type" : "application/json",
-            "Authorization" : `Bearer ${token}`
         }
     });
 
     useEffect(() => {
+        setFetchingPlaylists(true);
         Promise.all([
-            http.get("/api/playlists/get")
+            user ? http.get("/api/playlists/list") : null,
+            http.get("/api/playlists/listPublic")
         ])
-        .then(([resPlaylists]) => 
-            Promise.all([resPlaylists])
-        )
-        .then(([resPlaylists]) => {
+        .then(([resPlaylists, resPublicPlaylists]) => {
+            setFetchingPlaylists(false);
             console.log("Got playlists:", resPlaylists);
+            console.log("Public playlists:", resPublicPlaylists)
+
+            let ps : (Playlist)[] = []
+
+            for (var i = 0; i < 50; i+=3) {
+                ps.push(...[
+                    new Playlist(i + 1, "songs to do the thug shaker to"),
+                    new Playlist(i + 2, "derek di mashups"),
+                    new Playlist(i + 3, "pizza tower OST"),
+                ]);
+            }
+
+            console.log(ps);
+            setPlaylists(ps)
         });
     }, []);
 
     return {
-        playlists
+        playlists,
+        fetchingPlaylists,
+        playlistState
     }
 }

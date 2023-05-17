@@ -21,7 +21,8 @@ class LoginController extends Controller
         $credentials[$fieldType] = $credentials['login'];
         unset($credentials['login']);
 
-        if (Auth::attempt($credentials)) {
+        // TODO: Remember me (it's not handled properly clientside)
+        if (Auth::attempt($credentials, true)) {
             $request->session()->regenerate();
             $user = Auth::user();
 
@@ -37,7 +38,7 @@ class LoginController extends Controller
             'errors' => [
                 'login' => 'Ligma nuts, wrong creds',
             ]
-        ], 422);
+        ], 401);
     }
 
     public function logout(Request $request) {

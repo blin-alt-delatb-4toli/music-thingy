@@ -16,6 +16,7 @@ class User {
     constructor(userid: string, name: string, token: string) {
         this._userid = userid;
         this._username = name;
+        this._token = token;
     }
 
     get userid(): string {
@@ -44,33 +45,26 @@ class User {
 }
 
 export function UserState() {
-    const getToken = () =>{
-        const tokenString = sessionStorage.getItem('token') ?? '[]';
-        const userToken = JSON.parse(tokenString);
-        return userToken;
-    }
-
     const getUser = () =>{
         const userString = sessionStorage.getItem('user');
         if (!userString) {
             return null;
         }
 
-        const user_detail = JSON.parse(userString);
-        var user = new User(user_detail["username"], user_detail["username"], user_detail["token"]);
-        user.avatar = "??";
+        const userData = JSON.parse(userString);
+        var user = new User(userData["username"], userData["username"], userData["token"]);
 
         return user;
     }
 
-    const [token, setToken] = useState(getToken());
     const [user, setUser] = useState(getUser());
 
-    const saveToken = (user,token) =>{
-        sessionStorage.setItem('token',JSON.stringify(token));
-        sessionStorage.setItem('user',JSON.stringify(user));
+    const saveUser = (user, token) => {
+        console.assert(typeof token == "string");
 
-        setToken(token);
+        user["token"] = token;
+        sessionStorage.setItem('user', JSON.stringify(user));
+
         setUser(getUser());
     }
 
@@ -78,14 +72,13 @@ export function UserState() {
         // baseURL: "balls.itch/api",
         headers: {
             "Content-type" : "application/json",
-            "Authorization" : `Bearer ${token}`
+            "Authorization" : `Bearer ${user ? user.token : ''}`
         }
     });
 
     const logout = () => {
         sessionStorage.clear();
         setUser(null);
-        setToken(null);
     }
 
     const reqLogout = () => {
@@ -99,10 +92,8 @@ export function UserState() {
     }
     
     return {
-        setToken:saveToken,
-        token,
+        saveUser,
         user,
-        getToken,
         http,
         logout,
         reqLogout

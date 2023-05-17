@@ -3,6 +3,7 @@ import './bootstrap';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import '/resources/css/music.css';
+import '/resources/css/playlists.css';
 
 import {Root, About, Playlists, ErrorPage, RegisterPage} from "./routes";
 import { UserContext } from './what/login';
