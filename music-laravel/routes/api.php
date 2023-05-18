@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CheckAuth;
 use App\Http\Controllers\PlaylistController;
+use App\Http\Controllers\TrackController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,9 @@ Route::post('register', [RegisterController::class, 'register']);
 Route::middleware('auth')->group(function () {
     Route::get('/playlists/list', [PlaylistController::class, 'listOwn'])
         ->name('playlists.listOwn');
+
+    Route::post('/tracks/new', [TrackController::class, 'new'])
+        ->name("tracks.new");
 });
 
 Route::get('/playlists/listPublic', [PlaylistController::class, 'listPublic'])

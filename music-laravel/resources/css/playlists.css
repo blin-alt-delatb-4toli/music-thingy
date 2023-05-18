@@ -23,8 +23,11 @@
 
     .trackEntry {
         @apply border-b
+
         bg-gray-100
-        border-neutral-400
+        border-stone-300
+    
+        hover:border-stone-400
     }
 
     .newTrackEntry {
@@ -44,8 +47,12 @@
     }
 
     .trackDetails {
-        box-shadow: inset 14px 0px 6px -12px rgb(0 0 0 / 0.3);
-        @apply bg-gray-200
+        box-shadow: inset 4px 0px 3px -4px rgb(0 0 0 / 0.3);
+        @apply block bg-neutral-200
+    }
 
+    .trackAction {
+        @apply opacity-40
+        hover:opacity-100
     }
 }

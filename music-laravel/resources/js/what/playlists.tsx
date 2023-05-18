@@ -13,12 +13,23 @@ export class Playlist {
         this._id = id;
 
         for (var i = 0; i < 5; i++) {
-            this.addTrack(new Track(i, "Track " + i))
+            var trk = new Track(i);
+            trk.name = "Track " + i;
+
+            this.addTrack(trk)
         }
     }
     
     addTrack(track: Track) : void {
         this._tracks[track.id] = track;
+    }
+
+    removeTrack(track: Track) : void {
+        delete this._tracks[track.id];
+    }
+
+    removeTrackById(id: number) : void {
+        delete this._tracks[id];
     }
     
     hasTrack(track: Track) : boolean {

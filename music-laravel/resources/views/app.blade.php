@@ -11,7 +11,7 @@
 
         <title>Laravel React application</title>
         @viteReactRefresh
-        @vite('resources/js/app.tsx')
+        @vite('app.tsx')
         @vite('resources/css/music.css')
     </head>
 

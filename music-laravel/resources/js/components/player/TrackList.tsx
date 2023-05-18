@@ -1,7 +1,8 @@
 import { Playlist } from "resources/js/what/playlists";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { faClock } from "@fortawesome/free-regular-svg-icons";
+import { faEdit, faSave, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
 function TrackEntry({ playlist, track }) {
     return (<>
@@ -17,13 +18,18 @@ function TrackEntry({ playlist, track }) {
           <span className="trackAuthor"> {"Author name goes here"} </span>
         </div>
   
-        <div className="trackDetails text-sm w-auto min-w-[96px] h-full
+        <div className="trackDetails cursor-default text-sm w-auto h-full
         flex flex-col justify-center items-start px-2">
-          <div>
-            <FontAwesomeIcon icon={faClock}/>
-            <span className="ml-1">4:20</span>
+          <div className="h-6 flex items-center ml-auto pt-1">
+            <FontAwesomeIcon icon={faClock} className="h-[75%]"/>
+            <span className="ml-1 my-auto font-medium text-base leading-none">4:20</span>
           </div>
-          <span>thug shaker</span>
+          
+          <div className="h-5 flex mt-auto pb-1">
+            <FontAwesomeIcon icon={faSave} className="trackAction my-auto ml-1.5 h-full"/>
+            <FontAwesomeIcon icon={faTrashCan} className="trackAction my-auto ml-1.5 h-full"/>
+            <FontAwesomeIcon icon={faEdit} className="trackAction my-auto ml-1.5 h-full"/>
+          </div>
         </div>
       </button>
     </>)
