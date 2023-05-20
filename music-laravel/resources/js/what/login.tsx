@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useState, createContext } from 'react';
+import { useState, createContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const UserContext = createContext({
@@ -70,8 +70,10 @@ export function UserState() {
 
     const http = axios.create({
         // baseURL: "balls.itch/api",
+        withCredentials: true,
         headers: {
             "Content-type" : "application/json",
+            "Accept": "application/json",
             "Authorization" : `Bearer ${user ? user.token : ''}`
         }
     });
@@ -91,6 +93,22 @@ export function UserState() {
             })
     }
     
+    // this will run, like, once, probably
+    // good to validate session
+    useEffect(() => {
+        if (!user) return;
+
+        http.get("/api/check", {})
+            .then((res) => {
+                console.log("Confirmed session valid");
+            }, (err) => {
+                var resp = err.response;
+                if (resp && resp.status == 401) {
+                    logout();
+                }
+            })
+    }, []);
+
     return {
         saveUser,
         user,

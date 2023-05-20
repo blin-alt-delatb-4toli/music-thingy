@@ -1,14 +1,31 @@
 import { PlaylistList } from '../components/player/PlaylistList';
 import React from "react";
 import { Playlist, PlaylistContext, PlaylistState } from '../what/playlists';
-import { NewPlaylist } from './playlists/new';
+import { PlaylistDetails } from './playlists/details';
 
-function Header({ panel }) {
+interface IPanelState {
+  type: string,
+  val?: any
+}
+
+interface IPanel {
+  pnl: IPanelState,
+  setPnl: (s: IPanelState) => null
+}
+
+interface IPropPanel {
+  panel: IPanel
+}
+
+function Header({ panel } : IPropPanel) {
   const { pnl, setPnl } = panel;
   const { fetching } = React.useContext(PlaylistContext);
 
   const onNew = () => {
-    setPnl("New");
+    setPnl({
+      type: "New",
+      val: new Playlist(-1, "New Playlist")
+    });
   }
 
   return (<>
@@ -32,25 +49,28 @@ function Header({ panel }) {
 
 export function Playlists() {
   const {playlistState} = PlaylistState();
-  const [pnl, setPnl] = React.useState();
+  const [pnl, setPnl] = React.useState({type: "none"});
+  const playlist = pnl.val;
 
   return (
     <PlaylistContext.Provider value={playlistState}>
       <div className="flex flex-row h-full">
         { /* Scroll */ }
-        <div className="sm:w-[max(25%,300px)] sm:max-w-md playlistScroll">
+        <div className="min-w-[16rem] w-[20%] sm:max-w-md playlistScroll">
           <div className="flex flex-col max-h-[calc(100vh-3rem)] flex-auto">
             <Header panel={{pnl, setPnl}}/>
             <div className="pl-8 overflow-auto">
-              <PlaylistList />
+              <PlaylistList panel={{pnl, setPnl}}/>
             </div>
           </div>
         </div>
 
         { /* Right panel thing */ }
-        <div className="flex flex-col flex-auto h-full">
-            <NewPlaylist panel={{pnl, setPnl}}/>
+        <React.Fragment key={playlist?.id ?? "none"}>
+        <div className="flex flex-col flex-auto h-full lg:px-[calc((100%-1024px)*0.1)]">
+            <PlaylistDetails panel={{pnl, setPnl}}/>
         </div>
+        </React.Fragment>
       </div>
     </PlaylistContext.Provider>
   )

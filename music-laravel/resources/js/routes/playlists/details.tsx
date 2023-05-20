@@ -6,28 +6,58 @@ import { faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
 import { Track } from '@/what/tracks';
 import PlaylistTracks from '@/components/player/TrackList';
 
-function PlaylistDetails({ playlist }) {
-  const [ name, setName ] = React.useState("New Playlist");
+interface IPanelState {
+  type: string,
+  val?: any
+}
+
+interface IPanel {
+  pnl: IPanelState,
+  setPnl: (s: IPanelState) => null
+}
+
+interface IPropPanel {
+  panel: IPanel
+}
+
+
+function DetailsPanel({ playlist, panel } : { playlist: Playlist, panel: IPanel }) {
   const placeholderName = "New Playlist";
+  const [ name, setName ] = React.useState(playlist.name || placeholderName);
+  const { playlists, setPlaylists } = React.useContext(PlaylistContext);
 
   playlist.name = name || placeholderName;
 
+  const commit = (e) => {
+    e.preventDefault();
+    playlist.commit().then(() => {
+      if (!playlists.includes(playlist)) {
+        playlists.push(playlist);
+      }
+  
+      setPlaylists([
+        ...playlists
+      ])
+    });
+  }
+
   return (<>
     <div className="flex align-middle justify-stretch">
-      <input className="musTextField font-bold text-2xl
-        my-2 ml-4 w-auto shadow-md rounded-none rounded-l-md
-        flex-grow"
-        placeholder={placeholderName}
-        onChange={(e) => {
-          setName(e.target.value || e.target.placeholder);
-        } }
-      />
+
+        <input className="musTextField font-bold text-2xl
+          my-2 ml-4 w-auto shadow-md rounded-none rounded-l-md
+          flex-grow"
+          placeholder={placeholderName}
+          value={playlist.name}
+          onChange={(e) => {
+            setName(e.target.value || e.target.placeholder);
+          } } />
 
       <button className="musBtnElevatedBlue
         rounded-l-none border-l-0
         my-2 mr-4 h-auto w-24
         flex items-center justify-center
-        ">
+        " onClick={commit}>
           <FontAwesomeIcon icon={faSave} className="h-5 mr-1" />
           Save
       </button>
@@ -65,6 +95,8 @@ function NewTrackEntry({ playlist, addingTrack, doAction } : IProps) {
         setData
     ] : [NewTrackData, any] = React.useState(initialData);
 
+    const { playlists, setPlaylists } = React.useContext(PlaylistContext);
+
     if (!addingTrack) return;
 
     // ew
@@ -77,7 +109,7 @@ function NewTrackEntry({ playlist, addingTrack, doAction } : IProps) {
         setData({ ...initialData });
     }
 
-    const submitTrack = () => {
+    const submitTrack = async () => {
         var track = new Track(-1);
         track.url = url;
         track.name = name ?? track.name;
@@ -89,10 +121,25 @@ function NewTrackEntry({ playlist, addingTrack, doAction } : IProps) {
             return;
         }
 
+        if (!playlist.exists()) {
+          await playlist.commit();
+          if (!playlists.includes(playlist)) {
+            playlists.push(playlist);
+          }
+      
+          setPlaylists([
+            ...playlists
+          ])
+        }
+
         var ok = track.commitToServer();
     
         ok.then((res) => {
-          doAction({ type: "addTrack", val: track });
+          playlist.commitAddTrack(track)
+          .then((res) => {
+            doAction({ type: "addTrack", val: track });
+          })
+
           resetInput();
         }, (err) => {
             console.log("err while committing", err);
@@ -139,13 +186,9 @@ function NewTrackEntry({ playlist, addingTrack, doAction } : IProps) {
     </>)
 }
 
-export function NewPlaylist({ panel }) {
-  const { pnl, setPnl } = panel;
+export function PlaylistDetails({ panel } : IPropPanel) {
   const [addingTrack, setAddingTrack] = React.useState(false);
-
-  const [playlist] = React.useState(() => {
-    return new Playlist(-1, "New Playlist");
-  });
+  const playlist = panel.pnl.val;
 
   const [_, plAction] = React.useReducer((s, action: {type: string, val: any}) => {
     if (action.type == "addTrack") {
@@ -161,12 +204,12 @@ export function NewPlaylist({ panel }) {
     return s;
   }, 0);
 
-  if (pnl !== "New") {
+  if (panel.pnl.type !== "New" && panel.pnl.type !== "Selected") {
     return (<> </>);
   }
 
   return ( <>
-    <PlaylistDetails playlist={playlist}/>
+    <DetailsPanel playlist={playlist} panel={panel}/>
   
     <div className="bg-neutral-200 h-full p-4 pt-2 flex flex-col">
       { /* Toolbar thingy above the tracklist*/ }

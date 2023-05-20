@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -11,20 +12,6 @@ use Illuminate\Support\Facades\Log;
 class PlaylistController extends Controller
 {
     public function listOwn(Request $request) {
-        /*
-        id, createdBy, name, 
-         $table->id();
-            $table->bigInteger("created_by"); // foreign key to `users.id`
-            $table->text("name");
-            $table->bigInteger("publicity");
-            $table->timestamps();
-
-            $table->foreign("created_by")
-                  ->references("id")->on("users");
-        */
-
-        Log::debug("blacks :)");
-
         $playlists = DB::table('playlists')
             ->where("created_by", Auth::id())
             ->get();
@@ -36,5 +23,89 @@ class PlaylistController extends Controller
         return response()->json([
             'my (public) nuts' => true,
         ], 200);
+    }
+
+    public function new(Request $request) {
+        $data = $request->validate([
+            'name' => ['required', 'max:255']
+        ]);
+
+        $data['name'] = $data['name'] ?? "Untitled Playlist";
+
+        // TODO: Trying to locate the track via its' URL first would be nice
+        // (even if it's easily bypassed)
+        $trackID = DB::table("playlists")
+            ->insertGetId([
+                'created_by' => Auth::id(),
+                'publicity' => 0, // TODO: this should be an enum
+                'name' => $data["name"],
+            ]);
+
+        $data["id"] = $trackID;
+        $data["publicity"] = 0;
+
+        return response()->json($data, 200);
+    }
+
+    public function edit(Request $request) {
+        $data = $request->validate([
+            'id' => ['required', 'numeric'],
+            'name' => ['required', 'max:255']
+        ]);
+
+        DB::table("playlists")
+            ->where([
+                'id' => $data['id'],
+                'created_by' => Auth::id(), // make sure non-creator can't edit playlist
+            ])->update([
+                'name' => $data['name'],
+            ]);
+
+        return response()->noContent();
+    }
+
+    public function addTrack(Request $request) {
+        $data = $request->validate([
+            'id' => ['numeric', 'required'],
+            'trackId' => ['numeric', 'required'],
+        ]);
+
+        DB::statement("INSERT INTO playlist_tracks(playlist_id, track_id)
+            SELECT ?, ? WHERE EXISTS(SELECT id FROM playlists WHERE id = ? AND created_by = ?)",
+            [
+                $data['id'], $data['trackId'], // <- to insert
+                $data['id'], Auth::id(), // <- to check in `playlists`
+            ]);
+
+        return response()->noContent();
+    }
+
+    public function getTracks(Request $request) {
+        $data = $request->validate([
+            'id' => ['numeric', 'required'],
+        ]);
+
+        $tracks = DB::select("SELECT trackdata.*, list.* FROM track_userdata trackdata
+            INNER JOIN playlist_tracks list
+                ON list.track_id = trackdata.track_id
+                    AND list.playlist_id = ?
+            WHERE EXISTS(SELECT id FROM playlists WHERE id = ? AND (created_by = ? OR publicity = 1))",
+        [
+            $data['id'], $data['id'],
+            Auth::id(),
+        ]);
+
+
+        $resp = [];
+
+        foreach ($tracks as $trackDat) {
+            array_push($resp, [
+                "name" => $trackDat->track_name,
+                "author" => $trackDat->track_author,
+                "id" => $trackDat->track_id,
+            ]);
+        }
+        
+        return response()->json(["tracks" => $resp], 200);
     }
 }

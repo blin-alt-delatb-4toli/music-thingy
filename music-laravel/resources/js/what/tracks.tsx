@@ -18,6 +18,15 @@ export class Track {
         this._id = id;
     }
 
+    static fromResp(resp) : Track {
+        var trk = new Track(resp.id);
+        trk.url = resp.url;
+        trk.name = resp.name;
+        trk.author = resp.author;
+
+        return trk;
+    }
+
     canCommit() : [boolean, string?] {
         if (!this.url) {
             return [false, "Missing URL"];
@@ -30,6 +39,8 @@ export class Track {
         var [can, why] = this.canCommit();
         console.assert(can);
         
+        console.log("Committing track:", this);
+
         return http.post("/api/tracks/new", {
             url: this.url,
             name: this.name,

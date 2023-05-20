@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\CheckAuth;
+use App\Http\Controllers\Auth\CheckAuth;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\TrackController;
 
@@ -35,8 +35,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/playlists/list', [PlaylistController::class, 'listOwn'])
         ->name('playlists.listOwn');
 
+    Route::get('/playlists/getTracks', [PlaylistController::class, 'getTracks'])
+        ->name('playlists.getTracks');
+
+    Route::post('/playlists/addTrack', [PlaylistController::class, 'addTrack'])
+        ->name('playlists.addTrack');
+
+    Route::post('/playlists/new', [PlaylistController::class, 'new'])
+        ->name('playlists.new');
+
+    Route::post('/playlists/edit', [PlaylistController::class, 'edit'])
+        ->name('playlists.edit');
+
     Route::post('/tracks/new', [TrackController::class, 'new'])
         ->name("tracks.new");
+
+    Route::get('/check', [CheckAuth::class, 'check']);
 });
 
 Route::get('/playlists/listPublic', [PlaylistController::class, 'listPublic'])

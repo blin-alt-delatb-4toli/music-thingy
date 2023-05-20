@@ -25,10 +25,14 @@ return new class extends Migration
         Schema::create('playlist_tracks', function (Blueprint $table) {
             $table->bigInteger("playlist_id"); // foreign key to `playlists.id`
             $table->bigInteger("track_id");    // foreign key to `tracks.id`
-            $table->bigInteger("order");
+
+            // TODO: wouldn't it be more natural to represent playlist order
+            //       as a linked list? way easier to re-order...
+            $table->bigInteger("order")->nullable();
             $table->timestamps();
 
             $table->primary(["playlist_id", "track_id"]); // apparently can't just do ->primary() on both
+            $table->unique(["playlist_id", "order"]);
 
             // TODO: Cascade on both of these?
             $table->foreign("track_id")

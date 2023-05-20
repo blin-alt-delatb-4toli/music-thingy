@@ -10,7 +10,6 @@ class CheckAuth extends Controller
 {
     public function check(Request $request)
     {
-        Log::info("CheckAuth popped");
         return response()->json(['response' => 'yay'], 200);
     }
 }

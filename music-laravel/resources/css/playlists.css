@@ -27,12 +27,13 @@
         bg-gray-100
         border-stone-300
     
-        hover:border-stone-400
+        hover:bg-sky-100
     }
 
     .newTrackEntry {
         @apply trackEntry
         drop-shadow-lg
+        hover:bg-gray-100
     }
 
     .trackName {

@@ -31,8 +31,12 @@ class TrackController extends Controller
             'author' => ['sometimes', 'nullable', 'max:255'],
         ]);
 
+        dump($data);
+
         $data['author'] = $data['author'] ?? "Unknown";
         $data['name'] = $data['name'] ?? "ID";
+
+        dump($data);
 
         // TODO: Trying to locate the track via its' URL first would be nice
         // (even if it's easily bypassed)

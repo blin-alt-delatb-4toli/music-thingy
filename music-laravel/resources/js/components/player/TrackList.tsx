@@ -1,4 +1,4 @@
-import { Playlist } from "resources/js/what/playlists";
+import { Playlist, PlaylistContext } from "@/what/playlists";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
@@ -15,7 +15,7 @@ function TrackEntry({ playlist, track }) {
              having 3 flexboxes per each track is fine... */ }
         <div className="w-auto h-full flex flex-col justify-center items-start flex-grow">
           <span className="trackName"> {track.name} </span>
-          <span className="trackAuthor"> {"Author name goes here"} </span>
+          <span className="trackAuthor"> {track.author} </span>
         </div>
   
         <div className="trackDetails cursor-default text-sm w-auto h-full
@@ -42,11 +42,24 @@ export default function PlaylistTracks({ playlist, addingTrack }
     // So we'll just use the `playlist` from the parent state
     // and use `forceUpdate` to force a re-render of the tracklist
     // (because React compares shallowly, so we'd need to make a copy to mutate)
-  
+    
     const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
-  
+    
+    if (!playlist.fetchedTracks && playlist.exists()) {
+      playlist.fetchTracks().then(forceUpdate);
+    }
+
     return (<>
       {/* Draw the existing tracklist of ones that are in already */}
+
+      {
+        playlist.fetchingTracks ? (<>
+          <div className="mx-auto font-sans font-normal italic">
+            updating...
+          </div>
+        </>) : null
+      }
+
       { Object.entries(playlist.tracks).map(([tID, track]) => (
       <React.Fragment key={tID}>
         <TrackEntry playlist={playlist} track={track} />
