@@ -10,9 +10,15 @@ const http = axios.create({
     }
 });
 
-interface ITrackList {
+export interface ITrackList {
     [trackId: number]: Track
 }
+
+export const PlaylistContext = createContext({
+    playlists: [],
+    fetching: false,
+    setPlaylists: () => { console.error("too early"); } // wtf
+});
 
 export class Playlist {
     public name: string;
@@ -21,7 +27,7 @@ export class Playlist {
     public fetchedTracks: boolean = false;
 
     _id: number;
-    _tracks: { [trackId: number]: Track } = {};
+    tracks: { [trackId: number]: Track } = {};
     
     constructor(id: number, name: string) {
         this.name = name;
@@ -52,10 +58,62 @@ export class Playlist {
 
     commitAddTrack(track: Track) : Promise<AxiosResponse<any>> {
         console.assert(this.id >= 0);
+        console.assert(track.id >= 0);
 
         return http.post("/api/playlists/addTrack", {
             id: this._id,
             trackId: track.id,
+        }).then((yh) => {
+            this.addTrack(track);
+            return yh;
+        });
+    }
+
+    commitRemoveTrack(track: Track) : Promise<AxiosResponse<any>> {
+        console.assert(this.id >= 0);
+        console.assert(track.id >= 0);
+
+        return http.post("/api/playlists/removeTrack", {
+            id: this._id,
+            trackId: track.id,
+        }).then((yh) => {
+            this.removeTrack(track);
+            return yh;
+        });
+    }
+
+    // this is super shit, but combats concurrent requests,
+    // where they can finish out of order or with an error
+    private _curPubToken : null[] = [];
+    private _lastPub : number | null = null; // last successfully committed vis
+
+    commitPublicity(vis: number) : Promise<AxiosResponse<any>> {
+        console.assert(this.id >= 0);
+        console.assert(vis >= 0 && vis <= 2);
+
+        var token = [];
+        this._curPubToken = token;
+        
+        this._lastPub ??= this.publicity;
+
+        return http.post("/api/playlists/changePub", {
+            id: this._id,
+            vis: vis,
+        }).then((yh) => {
+            if (this._curPubToken == token) { // we're the only remaining request, and just finished
+                this.publicity = vis;
+            }
+            this._lastPub = vis;
+
+            return yh;
+        }, (err) => {
+            // we errored; restore publicity to last known/commited one
+            // This handles cases where first request finishes but doesnt set publicity
+            // (due to second request existing), and second request fails
+            // THIS ALSO SUCKS LMAO
+
+            this.publicity = this._lastPub! // guaranteed not null due to setting it before the request
+            throw err;
         });
     }
 
@@ -65,13 +123,11 @@ export class Playlist {
         this.fetchingTracks = true;
 
         return http.get("/api/playlists/getTracks", {
-            params: {
-                id: this._id, // hilarious. really funny.
+            params: { // hilarious. really funny. can't put headers into GET requests.
+                id: this._id,
             }
         }).then((res) => {
             var tracks : ITrackList = {};
-
-            console.log(res.data);
 
             for (var dat of res.data.tracks) {
                 var trk = Track.fromResp(dat);
@@ -81,35 +137,30 @@ export class Playlist {
             this.fetchingTracks = false;
             this.fetchedTracks = true;
         
-            this._tracks = tracks;
+            this.tracks = tracks;
 
             return tracks;
         });
     }
 
     addTrack(track: Track) : void {
-        this._tracks[track.id] = track;
+        this.tracks[track.id] = track;
     }
 
     removeTrack(track: Track) : void {
-        delete this._tracks[track.id];
+        delete this.tracks[track.id];
     }
 
     removeTrackById(id: number) : void {
-        delete this._tracks[id];
+        delete this.tracks[id];
     }
     
     hasTrack(track: Track) : boolean {
-        return !!(this._tracks[track._id]);
+        return !!(this.tracks[track._id]);
     }
 
     getTrack(id: number) : Track | null {
-        return this._tracks[id];
-    }
-
-    // Immutable tracklist pretty please :pleading_face:
-    get tracks(): { [trackId: number]: Track } {
-        return this._tracks;
+        return this.tracks[id];
     }
 
     get id(): number {
@@ -125,12 +176,6 @@ export class Playlist {
         this._id = v;
     }
 }
-
-export const PlaylistContext = createContext({
-    playlists: [],
-    fetching: false,
-    setPlaylists: () => { console.error("too early"); } // wtf
-});
 
 export function PlaylistState() {
     const [playlists, setPlaylists] = useState([]);
@@ -170,13 +215,15 @@ export function PlaylistState() {
 
                 for (var plDat of resPls) {
                     var pl = new Playlist(plDat.id, plDat.name);
-                    pl.publicity = plDat.publicity;
+                    pl.visibility = plDat.visibility;
 
                     ps.push(pl)
                 }
             }
             
             setPlaylists(ps)
+        }, (why) => {
+            setFetchingPlaylists(false);
         });
     }, []);
 

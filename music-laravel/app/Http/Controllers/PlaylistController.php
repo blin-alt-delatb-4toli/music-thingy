@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+enum PlaylistPublicity : int {
+    case Private = 0;
+    case Unlisted = 1;
+    case Public = 2; // note: max int is hardcoded in validation below. oops
+}
+
 class PlaylistController extends Controller
 {
     public function listOwn(Request $request) {
@@ -77,6 +83,40 @@ class PlaylistController extends Controller
                 $data['id'], Auth::id(), // <- to check in `playlists`
             ]);
 
+        return response()->noContent();
+    }
+
+    public function removeTrack(Request $request) {
+        $data = $request->validate([
+            'id' => ['numeric', 'required'],
+            'trackId' => ['numeric', 'required'],
+        ]);
+
+        DB::statement("DELETE FROM playlist_tracks WHERE track_id = ? AND playlist_id = ?
+            AND EXISTS(SELECT id FROM playlists WHERE id = ? AND created_by = ?)",
+            [
+                $data['trackId'], $data['id'],
+                $data['id'], Auth::id(), // <- to check in `playlists`
+            ]);
+
+        return response()->noContent();
+    }
+
+    public function changePublicity(Request $request) {
+        $data = $request->validate([
+            'id' => ['numeric', 'required'],
+            'vis' => ['numeric', 'required', 'min:0', 'max:2'],
+        ]);
+
+        $tracks = DB::table("playlists")
+            ->where([
+                "created_by" => Auth::id(),
+                "id" => $data["id"],    
+            ])
+            ->update([
+                "publicity" => $data["vis"]
+            ]);
+        
         return response()->noContent();
     }
 

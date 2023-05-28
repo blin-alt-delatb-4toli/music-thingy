@@ -41,6 +41,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/playlists/addTrack', [PlaylistController::class, 'addTrack'])
         ->name('playlists.addTrack');
 
+    Route::post('/playlists/removeTrack', [PlaylistController::class, 'removeTrack'])
+        ->name('playlists.removeTrack');
+
+    Route::post('/playlists/changePub', [PlaylistController::class, 'changePublicity'])
+        ->name('playlists.changePub');
+
     Route::post('/playlists/new', [PlaylistController::class, 'new'])
         ->name('playlists.new');
 

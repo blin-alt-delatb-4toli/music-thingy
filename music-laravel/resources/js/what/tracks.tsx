@@ -46,6 +46,7 @@ export class Track {
             name: this.name,
             author: this.author
         }).then((dat) => {
+            console.log("holy vased got", dat.data);
             this._id = dat.data.id;
             return dat;
         });

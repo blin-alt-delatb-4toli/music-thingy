@@ -20,6 +20,14 @@ code {
 }
 
 @layer components {
+  .musFrame {
+    @apply
+    rounded-md
+    bg-white shadow-lg
+    ring-1 ring-black ring-opacity-5
+    focus:outline-none
+  }
+
   .musBtnElevated {
     @apply
     px-2

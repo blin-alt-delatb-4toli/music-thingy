@@ -47,10 +47,17 @@ function Header({ panel } : IPropPanel) {
   </>)
 }
 
+var FUCK = 0;
+
 export function Playlists() {
   const {playlistState} = PlaylistState();
   const [pnl, setPnl] = React.useState({type: "none"});
   const playlist = pnl.val;
+
+  if (playlist) {
+    FUCK++;
+    playlist.I_HATE_EVERYTHING_ABOUT_YOU ??= FUCK;
+  }
 
   return (
     <PlaylistContext.Provider value={playlistState}>
@@ -66,7 +73,7 @@ export function Playlists() {
         </div>
 
         { /* Right panel thing */ }
-        <React.Fragment key={playlist?.id ?? "none"}>
+        <React.Fragment key={playlist?.I_HATE_EVERYTHING_ABOUT_YOU ?? "none"}>
         <div className="flex flex-col flex-auto h-full lg:px-[calc((100%-1024px)*0.1)]">
             <PlaylistDetails panel={{pnl, setPnl}}/>
         </div>
