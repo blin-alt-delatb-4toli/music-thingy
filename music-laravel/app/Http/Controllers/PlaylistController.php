@@ -26,9 +26,12 @@ class PlaylistController extends Controller
     }
 
     public function listPublic(Request $request) {
-        return response()->json([
-            'my (public) nuts' => true,
-        ], 200);
+        $playlists = DB::table('playlists')
+            ->where("publicity", PlaylistPublicity::Public)
+            ->limit(50)
+            ->get();
+            
+        return response()->json($playlists, 200);
     }
 
     public function new(Request $request) {
@@ -49,6 +52,7 @@ class PlaylistController extends Controller
 
         $data["id"] = $trackID;
         $data["publicity"] = 0;
+        $data["created_by"] = Auth::id();
 
         return response()->json($data, 200);
     }
@@ -129,10 +133,10 @@ class PlaylistController extends Controller
             INNER JOIN playlist_tracks list
                 ON list.track_id = trackdata.track_id
                     AND list.playlist_id = ?
-            WHERE EXISTS(SELECT id FROM playlists WHERE id = ? AND (created_by = ? OR publicity = 1))",
+            WHERE EXISTS(SELECT id FROM playlists WHERE id = ? AND (created_by = ? OR publicity = ?))",
         [
             $data['id'], $data['id'],
-            Auth::id(),
+            Auth::id(), PlaylistPublicity::Public->value
         ]);
 
 

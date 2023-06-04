@@ -35,9 +35,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/playlists/list', [PlaylistController::class, 'listOwn'])
         ->name('playlists.listOwn');
 
-    Route::get('/playlists/getTracks', [PlaylistController::class, 'getTracks'])
-        ->name('playlists.getTracks');
-
     Route::post('/playlists/addTrack', [PlaylistController::class, 'addTrack'])
         ->name('playlists.addTrack');
 
@@ -61,3 +58,7 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/playlists/listPublic', [PlaylistController::class, 'listPublic'])
     ->name('playlists.listPublic');
+
+// You don't *need* to be authenticated to list tracks, but then it'll only work on public playlists
+Route::get('/playlists/getTracks', [PlaylistController::class, 'getTracks'])
+    ->name('playlists.getTracks');

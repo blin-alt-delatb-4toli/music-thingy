@@ -20,9 +20,18 @@ export const PlaylistContext = createContext({
     setPlaylists: () => { console.error("too early"); } // wtf
 });
 
+export const Publicity = {
+    Private: 0,
+    Unlisted: 1,
+    Public: 2,
+}
+
 export class Playlist {
     public name: string;
-    public publicity: number = 0;
+    public publicity: number = Publicity.Private;
+    public ownerId: number = -1;
+    public createTime: number = -1;
+    public order: number = 0;
     public fetchingTracks: boolean = false;
     public fetchedTracks: boolean = false;
 
@@ -34,7 +43,7 @@ export class Playlist {
         this._id = id;
     }
     
-    commit() : Promise<AxiosResponse<any>> {
+    commit() : Promise<AxiosResponse> {
         if (!this.exists()) {
             // fake playlist; create it, self-assign id
             return http.post("/api/playlists/new", {
@@ -56,7 +65,7 @@ export class Playlist {
         return this._id >= 0;
     }
 
-    commitAddTrack(track: Track) : Promise<AxiosResponse<any>> {
+    commitAddTrack(track: Track) : Promise<AxiosResponse> {
         console.assert(this.id >= 0);
         console.assert(track.id >= 0);
 
@@ -69,7 +78,7 @@ export class Playlist {
         });
     }
 
-    commitRemoveTrack(track: Track) : Promise<AxiosResponse<any>> {
+    commitRemoveTrack(track: Track) : Promise<AxiosResponse> {
         console.assert(this.id >= 0);
         console.assert(track.id >= 0);
 
@@ -87,7 +96,7 @@ export class Playlist {
     private _curPubToken : null[] = [];
     private _lastPub : number | null = null; // last successfully committed vis
 
-    commitPublicity(vis: number) : Promise<AxiosResponse<any>> {
+    commitPublicity(vis: number) : Promise<AxiosResponse> {
         console.assert(this.id >= 0);
         console.assert(vis >= 0 && vis <= 2);
 
@@ -163,6 +172,12 @@ export class Playlist {
         return this.tracks[id];
     }
 
+    canEdit() : boolean {
+        const { user } = useContext(UserContext);
+
+        return user && (this._id < 0 || this.ownerId == user.id);
+    }
+
     get id(): number {
         return this._id;
     }
@@ -197,31 +212,67 @@ export function PlaylistState() {
         }
     });
 
+    const parseResponse = (resp, into) => {
+        for (var plDat of resp) {
+            var pl = new Playlist(plDat.id, plDat.name);
+            pl.publicity = plDat.publicity;
+            pl.ownerId = plDat.created_by;
+            pl.order = plDat.order;
+            pl.createTime = plDat.created_at;
+
+            into[pl.id] = pl;
+        }
+    }
+
+    const queryPlaylists = (offset?: number, pub?: boolean, search?: string) : Promise<AxiosResponse> => {
+        var endpoint = pub ? "listPublic" : "list";
+
+        return http.get("/api/playlists/" + endpoint, {
+            params: {
+                offset: offset,
+                search: search,
+            }
+        })
+    }
+    
     useEffect(() => {
+        // Only fetch the first batch automatically
+        if (playlists.length > 0)
+            return;
+
         setFetchingPlaylists(true);
+
         Promise.all([
-            user ? http.get("/api/playlists/list") : null,
-            http.get("/api/playlists/listPublic")
+            user ? queryPlaylists(0, false) : null,
+            queryPlaylists(0, true)
         ])
         .then(([resPlaylists, resPublicPlaylists]) => {
             setFetchingPlaylists(false);
-            // console.log("Got playlists:", resPlaylists);
-            // console.log("Public playlists:", resPublicPlaylists)
 
-            var ps : (Playlist)[] = []
+            var ps : { [id: number]: Playlist } = {}
             
             if (resPlaylists) {
-                var resPls = resPlaylists.data;
+                parseResponse(resPlaylists.data, ps);
+            }
 
-                for (var plDat of resPls) {
-                    var pl = new Playlist(plDat.id, plDat.name);
-                    pl.visibility = plDat.visibility;
-
-                    ps.push(pl)
-                }
+            if (resPublicPlaylists) {
+                parseResponse(resPublicPlaylists.data, ps);
             }
             
-            setPlaylists(ps)
+            var psArr : Playlist[] = Object.values(ps);
+            psArr.sort((a, b) => {
+                if (a.order != b.order) {
+                    return (a.order < b.order ? 1 : -1)
+                }
+                
+                if (a.createTime != b.createTime) {
+                    return (a.order < b.order ? 1 : -1)
+                }
+
+                return 0;
+            })
+
+            setPlaylists(psArr)
         }, (why) => {
             setFetchingPlaylists(false);
         });
@@ -231,6 +282,7 @@ export function PlaylistState() {
         playlists,
         setPlaylists,
         fetchingPlaylists,
-        playlistState
+        playlistState,
+        queryPlaylists
     }
 }

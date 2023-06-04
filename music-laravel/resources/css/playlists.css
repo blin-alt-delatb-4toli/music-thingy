@@ -13,6 +13,7 @@
         @apply 
         hover:bg-slate-300 hover:rounded-md
         text-left text-black pl-3
+        text-ellipsis
     }
 
     .tracklistScroll {
@@ -55,5 +56,23 @@
     .trackAction {
         @apply opacity-40
         hover:opacity-100
+    }
+
+    .playlistListSelection {
+        /* box-shadow: inset 0px -1px 4px -2px rgb(0 0 0 / 0.3);
+        */
+
+        @apply bg-neutral-50
+        box-content
+        border-r border-b border-neutral-300
+    }
+
+    .playlistListSelectionSel {
+        /* box-shadow: inset 0px -1px 4px -2px rgb(0 0 0 / 0.3);
+        */
+
+        @apply bg-none
+        box-content
+        border-r border-neutral-300
     }
 }

@@ -7,14 +7,16 @@ export const UserContext = createContext({
     userActions: null,
 });
 
-class User {
+export class User {
     _username: string;
     _userid: string;
+    _id: number;
     _avatarURL: string = "https://i.imgur.com/flZWEsb.png";
     _token: string | undefined;
 
-    constructor(userid: string, name: string, token: string) {
+    constructor(id: number, userid: string, name: string, token: string) {
         this._userid = userid;
+        this._id = id;
         this._username = name;
         this._token = token;
     }
@@ -42,6 +44,10 @@ class User {
     get token() : string | undefined {
         return this._token;
     }
+
+    get id() : number {
+        return this._id;
+    }
 }
 
 export function UserState() {
@@ -52,7 +58,7 @@ export function UserState() {
         }
 
         const userData = JSON.parse(userString);
-        var user = new User(userData["username"], userData["username"], userData["token"]);
+        var user = new User(userData["id"], userData["username"], userData["username"], userData["token"]);
 
         return user;
     }

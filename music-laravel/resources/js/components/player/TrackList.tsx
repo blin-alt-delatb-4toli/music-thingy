@@ -1,9 +1,10 @@
-import { Playlist, PlaylistContext } from "@/what/playlists";
+import { ITrackList, Playlist, PlaylistContext } from "@/what/playlists";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { faDownload, faEdit, faSave, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { SelectedPlaylistContext, ISelectedPlaylistContext } from "@/routes/playlists/details";
+import { Track } from "@/what/tracks";
 
 function IconButton({ action, icon }) {
   return (<>
@@ -13,7 +14,13 @@ function IconButton({ action, icon }) {
   </>)
 }
 
-function TrackEntry({ playlist, track, setTracks }) {
+interface IProps {
+  track: Track,
+  playlist: Playlist,
+  setTracks: (t: ITrackList) => null,
+}
+
+function TrackEntry({ playlist, track, setTracks } : IProps) {
   const deleteTrack = async () => {
     await playlist.commitRemoveTrack(track);
     console.log("commited remove, tracks =>", playlist.tracks);
@@ -50,10 +57,10 @@ function TrackEntry({ playlist, track, setTracks }) {
           <span className="ml-1 my-auto font-medium text-base leading-none">4:20</span>
         </div>
         
-        <div className="h-5 flex mt-auto pb-1 w-full flex-row items-center">
+        <div className="h-5 flex mt-auto pb-1 w-full flex-row items-center justify-end">
           <IconButton icon={faDownload} action={downloadTrack}/>
-          <IconButton icon={faTrashCan} action={deleteTrack}/>
-          <IconButton icon={faEdit} action={editTrack}/>
+          {playlist.canEdit() ? <IconButton icon={faTrashCan} action={deleteTrack}/> : null}
+          {playlist.canEdit() ? <IconButton icon={faEdit} action={editTrack}/> : null}
         </div>
       </div>
     </div>

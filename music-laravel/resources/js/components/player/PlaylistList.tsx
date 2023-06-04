@@ -5,13 +5,12 @@ interface IProps {
     panel: {
         pnl: {type: string, val: any},
         setPnl: (s: {type: string, val: any}) => null
-    }
+    },
+    playlists: Playlist[]
 }
 
-function ShowLoadedList({ panel } : IProps) {
-    const { playlists } = React.useContext(PlaylistContext);
-    console.log("ShowLoadedList update", playlists);
-
+function ShowLoadedList({ panel, playlists } : IProps) {
+    // const { playlists } = React.useContext(PlaylistContext);
     const selectPlaylist = (pl: Playlist) => {
         panel.setPnl({type: "Selected", val: pl});
     }
@@ -20,20 +19,19 @@ function ShowLoadedList({ panel } : IProps) {
         {playlists.map((pl: Playlist) => (
             <React.Fragment key={pl.id}>
                 <button id={pl.id}
-                className="playlistOption h-auto min-h-[2rem] w-full"
+                className="playlistOption h-auto min-h-[2rem] w-full overflow-hidden whitespace-nowrap"
                 onClick={(e) => { selectPlaylist(pl); }}>
                     { pl.name }
                 </button>
             </React.Fragment>
-            
         ))}
     </>)
 }
 
-export function PlaylistList({ panel } : IProps) {
+export function PlaylistList({ panel, playlists } : IProps) {
     return (<>
         <div className="overflow-y-auto w-full pr-2">
-            <ShowLoadedList panel={panel}/>
+            <ShowLoadedList panel={panel} playlists={playlists}/>
         </div>
     </>)
 }

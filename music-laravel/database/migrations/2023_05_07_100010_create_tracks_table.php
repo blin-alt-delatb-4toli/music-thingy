@@ -23,7 +23,8 @@ return new class extends Migration
             $table->bigInteger("track_id");
             $table->text("track_name");
             $table->text("track_author");
-            $table->timestamps();
+            $table->timestamp("created_at")->useCurrent();
+            $table->timestamp("updated_at")->useCurrent()->useCurrentOnUpdate();
 
             $table->primary(["user_id", "track_id"]);
 

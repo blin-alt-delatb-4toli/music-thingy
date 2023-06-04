@@ -6,6 +6,7 @@ import { faEye, faEyeLowVision, faEyeSlash, faPlus, faSave } from '@fortawesome/
 import { Track } from '@/what/tracks';
 import PlaylistTracks from '@/components/player/TrackList';
 import { Disclosure, Menu } from '@headlessui/react';
+import { UserContext } from '@/what/login';
 
 interface IPanelState {
   type: string,
@@ -24,7 +25,7 @@ interface IPropPanel {
 export interface ISelectedPlaylistContext {
   playlist: Playlist | null,
   tracks: ITrackList,
-  setTracks: (trks: ITrackList) => {};
+  setTracks: (trks: ITrackList) => null;
 }
 
 export const SelectedPlaylistContext = React.createContext({
@@ -47,6 +48,7 @@ function DetailsPanel({ playlist, panel } : { playlist: Playlist, panel: IPanel 
   const [ name, setName ] = React.useState(playlist.name || placeholderName);
   const { playlists, setPlaylists } = React.useContext(PlaylistContext);
   const [ pub, setPub ] = React.useState(playlist.publicity);
+  const { user } = React.useContext(UserContext);
 
   playlist.name = name || placeholderName;
 
@@ -73,6 +75,9 @@ function DetailsPanel({ playlist, panel } : { playlist: Playlist, panel: IPanel 
 
     await playlist.commitPublicity(val.enum);
     setPub(val.enum);
+    // Update the playlists list because we may need to update the displayed list
+    // (ie, if we're on the "public") tab and we just hid a playlist
+    setPlaylists([ ...playlists ]);
   }
 
   const curVis = visibilities[pub];
@@ -82,42 +87,45 @@ function DetailsPanel({ playlist, panel } : { playlist: Playlist, panel: IPanel 
       <div className="w-full h-auto flex flex-row">
         
         <input className="musTextField font-bold text-2xl
-          w-auto shadow-md rounded-none rounded-l-md
+          w-auto shadow-md disabled:shadow-none rounded-none rounded-l-md
           flex-grow h-auto"
           placeholder={placeholderName}
           value={playlist.name}
+          disabled={!playlist.canEdit()}
           onChange={(e) => {
             setName(e.target.value || e.target.placeholder);
           } } />
 
-        <button className="musBtnElevatedBlue
+        {playlist.canEdit() ? <button className="musBtnElevatedBlue
           rounded-l-none border-l-0
           mr-4 h-auto w-24
           flex items-center justify-center
           " onClick={commitPlaylist}>
             <FontAwesomeIcon icon={faSave} className="h-5 mr-1" />
             Save
-        </button>
+        </button> : null}
       </div>
 
       <div className="px-4 my-1">
         <Menu as="div" className="relative ml-auto right-0">
         <Disclosure className="bg-gray-800">
-          {({ open }) => ( <>
+          {({ open, close }) => ( <>
+            { (!playlist.canEdit() && open) ? close() : null }
             <Disclosure.Button className={classNames(
                 open
                   ? 'bg-gray-700 text-white'
                   : 'hover:bg-gray-700 hover:text-white',
                 'px-3 h-full font-medium min-w-[120px] text-lg',
                 'flex flex-row justify-center items-center'
-              )}>
+              )}
+              disabled={!playlist.canEdit()}>
               <FontAwesomeIcon icon={curVis.icon} className="mr-1" />
               {curVis.name}
             </Disclosure.Button>
 
             <Menu.Items className="musFrame absolute flex flex-col rounded-tl-none max-w-[256px] w-fit origin-top-right py-1">
               { visibilities.map( (value) => {
-                return (<Menu.Item as="button" key={value.name} className="w-auto px-0 mx-0 flex">
+                return (<Menu.Item as="button" disabled={!user} key={value.name} className="w-auto px-0 mx-0 flex">
                   {({ active }) => (
                     <a className={ classNames(
                       "px-4 w-full mx-0 flex min-h-[32px] items-center justify-center",
@@ -266,7 +274,7 @@ function NewTrackEntry({ addingTrack } : IProps) {
 export function PlaylistDetails({ panel } : IPropPanel) {
   const [addingTrack, setAddingTrack] = React.useState(false);
 
-  const playlist = panel.pnl.val; // can be null!
+  const playlist : Playlist = panel.pnl.val; // can be null!
   const [tracks, setTracks] = React.useState(playlist?.tracks ?? {});
 
   if (panel.pnl.type !== "New" && panel.pnl.type !== "Selected") {
@@ -284,13 +292,17 @@ export function PlaylistDetails({ panel } : IPropPanel) {
     setTracks: setTracks,
   }
 
+  if (addingTrack && !playlist.canEdit()) {
+    setAddingTrack(false);
+  }
+
   return ( <>
     { /* Playlist name and such */ }
     <DetailsPanel playlist={playlist} panel={panel}/>
   
-    <div className="bg-neutral-200 h-full p-4 pt-2 flex flex-col">
+    <div className="bg-neutral-200 h-full p-4 py-2 flex flex-col">
       { /* Toolbar thingy above the tracklist */ }
-      <div className="min-h-[2.5rem] pt-1 flex flex-row justify-center mr-0 ml-auto">
+      {playlist.canEdit() ? (<div className="min-h-[2.5rem] flex flex-row justify-center mr-0 ml-auto">
         <button className={
           "musBtnElevatedGreen w-fit h-auto "
           + (addingTrack ? "rounded-b-none mb-0 border-b-0" : "mb-1")
@@ -299,7 +311,7 @@ export function PlaylistDetails({ panel } : IPropPanel) {
           <FontAwesomeIcon icon={faPlus} className="mr-1.5 scale-110" />
           Add track
         </button>
-      </div>
+      </div>) : null}
 
 
       { /* Tracklist itself */ }

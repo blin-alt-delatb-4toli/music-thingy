@@ -1,7 +1,10 @@
 import { PlaylistList } from '../components/player/PlaylistList';
 import React from "react";
-import { Playlist, PlaylistContext, PlaylistState } from '../what/playlists';
+import { Playlist, PlaylistContext, PlaylistState, Publicity } from '../what/playlists';
 import { PlaylistDetails } from './playlists/details';
+import { User, UserContext } from '@/what/login';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faMagnifyingGlass, faPlayCircle, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 interface IPanelState {
   type: string,
@@ -17,9 +20,14 @@ interface IPropPanel {
   panel: IPanel
 }
 
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ')
+}
+
 function Header({ panel } : IPropPanel) {
   const { pnl, setPnl } = panel;
   const { fetching } = React.useContext(PlaylistContext);
+  const { user } = React.useContext(UserContext);
 
   const onNew = () => {
     setPnl({
@@ -29,25 +37,36 @@ function Header({ panel } : IPropPanel) {
   }
 
   return (<>
-      <h2 className="text-3xl font-bold m-2 mb-1 align-middle flex">
-          Playlists
+      <div className="font-bold m-2 mb-1 h-8 align-middle flex">
+          <div className="flex h-full mr-2 flex-grow w-48">
+            <span className="musTextFieldIconHolder bg-white">
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+            </span>
+            <input type="search"
+            id="search"
+            onChange={ e => console.log(e) }
+            className="musTextFieldEntry"
+            placeholder="Search"/>
+          </div>
 
-          <button className="musBtnElevatedGreen text-base h-8 ml-auto px-4 my-auto"
+          {user ? (<button className="musBtnElevatedGreen text-base h-full
+            w-auto ml-auto p-2 flex justify-center items-center"
             onClick={onNew}>
-            New
-          </button>
-      </h2>
+            <FontAwesomeIcon icon={faPlus} />
+          </button>) : null}
+      </div>
+    
       <h3>
-        { fetching ? (
+        { /* fetching ? (
           <div className="hidden md:block ml-4 font-sans font-normal italic">
             updating...
           </div>
-        ) : null }
+        ) : null */ }
       </h3>
   </>)
 }
 
-var FUCK = 0;
+var THIS_SUCKS = 0;
 
 export function Playlists() {
   const {playlistState} = PlaylistState();
@@ -55,19 +74,85 @@ export function Playlists() {
   const playlist = pnl.val;
 
   if (playlist) {
-    FUCK++;
-    playlist.I_HATE_EVERYTHING_ABOUT_YOU ??= FUCK;
+    THIS_SUCKS++;
+    playlist.I_HATE_EVERYTHING_ABOUT_YOU ??= THIS_SUCKS;
   }
 
+  const [selTab, setSelTab] = React.useState(0);
+  const { user } : { user: User } = React.useContext(UserContext);
+  const { playlists } : { playlists: Playlist[] } = playlistState;
+
+  const playlistTabs = [
+    {
+      icon: <FontAwesomeIcon icon={faPlayCircle} className="mr-1 h-4"/>,
+      name: "My playlists",
+      canShow: () => {
+        return !!user;
+      },
+      filter: (p: Playlist) => {
+        return p.ownerId == user.id;
+      }
+    },
+    {
+      icon: <FontAwesomeIcon icon={faEye} className="mr-1 h-4"/>,
+      name: "Public playlists",
+      filter: (p: Playlist) => {
+        return p.publicity == Publicity.Public;
+      }
+    },
+  ]
+
+  const selectTab = (v, idx) => {
+    console.log("Select")
+    setSelTab(idx);
+  }
+
+  var curTab = playlistTabs[selTab];
+
+  if (curTab.canShow && curTab.canShow() == false) {
+    // We can't show the selected tab anymore; select the next tab that we can
+    for (var idx in playlistTabs) {
+      var tab = playlistTabs[idx]
+      if (!tab.canShow || tab.canShow()) {
+        setSelTab(idx);
+        curTab = tab;
+        break;
+      }
+    }
+  }
+
+  const filtered = playlists.filter(curTab.filter);
+  
   return (
     <PlaylistContext.Provider value={playlistState}>
       <div className="flex flex-row h-full">
         { /* Scroll */ }
-        <div className="min-w-[16rem] w-[20%] sm:max-w-md playlistScroll">
-          <div className="flex flex-col max-h-[calc(100vh-3rem)] flex-auto">
+        <div className="min-w-[16rem] sm:max-w-sm playlistScroll w-fit">
+          <div className="inline-flex flex-col max-h-[calc(100vh-3rem)] w-full">
+            <div className="h-10 flex w-full">
+              {playlistTabs.map((v, idx) => {
+                if (v.canShow && v.canShow() == false) {
+                  return;
+                }
+                
+                return (<React.Fragment key={idx}>
+                  <button
+                    className={ classNames(
+                      (idx == selTab) ? "playlistListSelectionSel" : "playlistListSelection",
+                      "h-full flex-1 content-b flex justify-center items-center w-full min-w-[fit-content]")
+                    }
+                    onClick={() => { selectTab(v, idx) }}>
+                      {v.icon}
+                      {v.name}
+                  </button>
+                  </React.Fragment>)
+               } )
+              }
+            </div>
+
             <Header panel={{pnl, setPnl}}/>
-            <div className="pl-8 overflow-auto">
-              <PlaylistList panel={{pnl, setPnl}}/>
+            <div className="pl-2 overflow-auto w-72">
+              <PlaylistList panel={{pnl, setPnl}} playlists={filtered}/>
             </div>
           </div>
         </div>
